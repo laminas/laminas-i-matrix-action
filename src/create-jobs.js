@@ -7,16 +7,20 @@ import { Job } from './job.js';
 import create_additional_jobs from './additional-checks.js';
 import validateAndNormalizeChecks from './validate-and-normalize-checks-from-config.js';
 
+const xmlSchema = {
+    phpunit: 'vendor/phpunit/phpunit/phpunit.xsd',
+    phpcs: 'vendor/squizlabs/php_codesniffer/phpcs.xsd',
+    psalm: 'vendor/vimeo/psalm/config.xsd',
+};
+
 /**
  * @param {String} filename
- * @return {Boolean}
+ * @return {function(): boolean}
  */
 const fileTest = function (filename) {
     return function () {
-        if (fs.existsSync(filename)) {
-            return true;
-        }
-        return false;
+        return fs.existsSync(filename);
+
     };
 };
 
@@ -40,10 +44,11 @@ const createQaJobs = function (command, config) {
 };
 
 /**
+ * @param {String} command
  * @param {Config} config
  * @return {Array}
  */
-const createPHPUnitJobs = function (config) {
+const createPHPUnitJobs = function (command, config) {
     let jobs = [];
     if (config.lockedDependencies) {
         /** Locked dependencies are always used with the minimum PHP version supported by the project. */
@@ -60,32 +65,33 @@ const createPHPUnitJobs = function (config) {
                  * @param {String} deps
                  */
                 function (deps) {
-                    jobs.push(createPHPUnitJob(version, deps, config));
+                    jobs.push(createPHPUnitJob(command, version, deps, config));
                 }
             );
         }
-    )
+    );
 
     return jobs;
-}
+};
 
 /**
+ * @param {String} command
  * @param {String} version
  * @param {String} deps
  * @param {Config} config
  * @return {Job}
  */
-const createPHPUnitJob = function (version, deps, config) {
+const createPHPUnitJob = function (command, version, deps, config) {
     return new Job(
         'PHPUnit on PHP ' + version + ' with ' + deps + ' dependencies',
         JSON.stringify(new Command(
-            './vendor/bin/phpunit',
+            command,
             version,
             config.extensions,
             config.php_ini,
             deps,
             config.ignore_platform_reqs_8,
-        )),
+        ))
     );
 };
 
@@ -97,13 +103,13 @@ const createNoOpJob = function (config) {
     return [new Job(
         'No checks',
         JSON.stringify(new Command(
-            "",
+            '',
             config.stable_version,
             [],
             [],
             'locked',
             config.ignore_platform_reqs_8,
-        )),
+        ))
     )];
 };
 
@@ -115,35 +121,92 @@ function checks (config) {
     return [
         new Check(
             config.code_checks,
-            [fileTest('phpunit.xml.dist'), fileTest('phpunit.xml')],
+            [fileTest('phpunit.xml.dist')],
             /**
              * @param {Config} config
              * @return {Array}
              */
             function (config) {
-                return createPHPUnitJobs(config);
+                return createPHPUnitJobs(
+                    `xmllint --noout --schema ${xmlSchema.phpunit} phpunit.xml.dist`
+                    + './vendor/bin/phpunit',
+                    config,
+                );
             }
         ),
         new Check(
             config.code_checks,
-            [fileTest('phpcs.xml.dist'), fileTest('phpcs.xml')],
+            [fileTest('phpunit.xml')],
             /**
              * @param {Config} config
              * @return {Array}
              */
             function (config) {
-                return createQaJobs('./vendor/bin/phpcs -q --report=checkstyle | cs2pr', config);
+                return createPHPUnitJobs(
+                    `xmllint --noout --schema ${xmlSchema.phpunit} phpunit.xml`
+                    + './vendor/bin/phpunit',
+                    config,
+                );
             }
         ),
         new Check(
             config.code_checks,
-            [fileTest('psalm.xml.dist'), fileTest('psalm.xml')],
+            [fileTest('phpcs.xml.dist')],
             /**
              * @param {Config} config
              * @return {Array}
              */
             function (config) {
-                return createQaJobs('./vendor/bin/psalm --shepherd --stats --output-format=github --no-cache', config);
+                return createQaJobs(
+                    `xmllint --noout --schema ${xmlSchema.phpcs} phpcs.xml.dist`
+                    + './vendor/bin/phpcs -q --report=checkstyle | cs2pr',
+                    config
+                );
+            }
+        ),
+        new Check(
+            config.code_checks,
+            [fileTest('phpcs.xml')],
+            /**
+             * @param {Config} config
+             * @return {Array}
+             */
+            function (config) {
+                return createQaJobs(
+                    `xmllint --noout --schema ${xmlSchema.phpcs} phpcs.xml`
+                    + './vendor/bin/phpcs -q --report=checkstyle | cs2pr',
+                    config
+                );
+            }
+        ),
+        new Check(
+            config.code_checks,
+            [fileTest('psalm.xml.dist')],
+            /**
+             * @param {Config} config
+             * @return {Array}
+             */
+            function (config) {
+                return createQaJobs(
+                    `xmllint --noout --schema ${xmlSchema.psalm} psalm.xml.dist`
+                    + './vendor/bin/psalm --shepherd --stats --output-format=github --no-cache',
+                    config
+                );
+            }
+        ),
+        new Check(
+            config.code_checks,
+            [fileTest('psalm.xml')],
+            /**
+             * @param {Config} config
+             * @return {Array}
+             */
+            function (config) {
+                return createQaJobs(
+                    `xmllint --noout --schema ${xmlSchema.psalm} psalm.xml`
+                    + './vendor/bin/psalm --shepherd --stats --output-format=github --no-cache',
+                    config
+                );
             }
         ),
         new Check(
@@ -154,7 +217,10 @@ function checks (config) {
              * @return {Array}
              */
             function (config) {
-                return createQaJobs('./vendor/bin/phpbench run --revs=2 --iterations=2 --report=aggregate', config);
+                return createQaJobs(
+                    './vendor/bin/phpbench run --revs=2 --iterations=2 --report=aggregate',
+                    config
+                );
             }
         ),
         new Check(
