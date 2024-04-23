@@ -473,6 +473,14 @@ export default function createConfig(
         baseReference = null;
     }
 
+    const laminasOrganizations : string[] = [
+        'laminas',
+        'mezzio',
+        'laminas-api-tools',
+    ];
+
+    const repositoryOwner: string = process.env.GITHUB_REPOSITORY_OWNER ?? 'unknown';
+
     return {
         codeChecks                    : requirements.codeChecks,
         docLinting                    : requirements.docLinting,
@@ -485,7 +493,7 @@ export default function createConfig(
         lockedDependenciesExists      : fs.existsSync(composerLockJsonFileName),
         ignorePhpPlatformRequirements : configurationFromFile.ignore_php_platform_requirements ?? {},
         additionalComposerArguments   : [ ... new Set(configurationFromFile.additional_composer_arguments ?? []) ],
-        backwardCompatibilityCheck    : configurationFromFile.backwardCompatibilityCheck ?? false,
+        backwardCompatibilityCheck    : configurationFromFile.backwardCompatibilityCheck ?? laminasOrganizations.includes(repositoryOwner) ?? false,
         baseReference                 : baseReference,
     };
 }
