@@ -136,7 +136,7 @@ jobs:
       - uses: "actions/setup-node@v4"
         with:
           check-latest: true
-          node-version: 20
+          node-version: 21
       - name: "Install node modules"
         run: "npm ci"
       - name: Run ESLint
@@ -149,8 +149,19 @@ jobs:
       - uses: "actions/setup-node@v4"
         with:
           check-latest: true
-          node-version: 20
+          node-version: 21
       - name: "Install node modules"
         run: "npm ci"
       - name: Run Jest
         run: "npm run test"
+
+  package-lock-up-to-date:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "actions/setup-node@v4"
+        with:
+          check-latest: true
+          node-version: 21
+      - name: "Check package-lock.json is up2date"
+        run: "npx --yes package-lock-utd"

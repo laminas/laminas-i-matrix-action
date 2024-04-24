@@ -6,6 +6,7 @@ COPY package*.json ./
 COPY tsconfig.json ./
 COPY webpack.config.ts ./
 RUN npm ci
+RUN apk add --no-cache jq && npx semver -r $(jq -r '.engines.node' package.json) $(node -v) || (echo "ERROR: Container node version is not allowed by projects package.json engine range." && exit 1)
 COPY ./src ./src
 RUN npm run build
 
