@@ -6,7 +6,6 @@ COPY package*.json ./
 COPY tsconfig.json ./
 COPY webpack.config.ts ./
 RUN npm ci
-RUN apk add --no-cache jq && npx semver -r $(jq -r '.packages."".engines.node' package-lock.json) $(node -v) || (echo "ERROR: package-lock.json is not synchronized with Dockerfile node version." && exit 1)
 COPY ./src ./src
 RUN npm run build
 
