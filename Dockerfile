@@ -1,4 +1,4 @@
-FROM node:20.5.1-alpine as compiler
+FROM node:21.7.3-alpine as compiler
 
 RUN mkdir -p /usr/local/source
 WORKDIR /usr/local/source
@@ -6,11 +6,12 @@ COPY package*.json ./
 COPY tsconfig.json ./
 COPY webpack.config.ts ./
 RUN npm ci
+RUN apk add --no-cache jq && npx semver -r $(jq -r '.engines.node' package.json) $(node -v) || (echo "ERROR: Container node version is not allowed by projects package.json engine range." && exit 1)
 COPY ./src ./src
 RUN npm run build
 
 
-FROM node:20.5.1-alpine
+FROM node:21.7.3-alpine
 LABEL "repository"="http://github.com/laminas/laminas-ci-matrix-action"
 LABEL "homepage"="http://github.com/laminas/laminas-ci-matrix-action"
 LABEL "maintainer"="https://github.com/laminas/technical-steering-committee/"

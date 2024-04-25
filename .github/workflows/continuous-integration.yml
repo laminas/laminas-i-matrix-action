@@ -19,7 +19,7 @@ jobs:
       matrix: ${{ steps.matrix.outputs.matrix }}
     steps:
       - name: Checkout sourcecode
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Gather integration test directory names
         id: matrix
         # This provides a dedicated "check" to asynchronously test all integration tests within the tests/ directory
@@ -34,16 +34,16 @@ jobs:
       fail-fast: true
     steps:
       - name: Checkout sourcecode
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Build container for CI pipeline
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           load: true
@@ -54,7 +54,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Upload container artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: container
           path: /tmp/container.tar
@@ -69,10 +69,10 @@ jobs:
         projectName: ${{ fromJSON(needs.matrix.outputs.matrix) }}
     steps:
       - name: Checkout sourcecode
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download container artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: container
           path: /tmp
@@ -116,27 +116,27 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Build
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           push: false
 
   linting:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v3"
-      - uses: "actions/setup-node@v3"
+      - uses: "actions/checkout@v4"
+      - uses: "actions/setup-node@v4"
         with:
           check-latest: true
-          node-version: 20
+          node-version: 21
       - name: "Install node modules"
         run: "npm ci"
       - name: Run ESLint
@@ -145,12 +145,23 @@ jobs:
   testing:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v3"
-      - uses: "actions/setup-node@v3"
+      - uses: "actions/checkout@v4"
+      - uses: "actions/setup-node@v4"
         with:
           check-latest: true
-          node-version: 20
+          node-version: 21
       - name: "Install node modules"
         run: "npm ci"
       - name: Run Jest
         run: "npm run test"
+
+  package-lock-up-to-date:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v4"
+      - uses: "actions/setup-node@v4"
+        with:
+          check-latest: true
+          node-version: 21
+      - name: "Check package-lock.json is up2date"
+        run: "npx --yes package-lock-utd"
