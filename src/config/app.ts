@@ -250,7 +250,10 @@ function isJobExcludedByConfiguration(
 ): boolean {
     const jobName = isJobFromTool(job) ? job.tool.name : job.name;
 
-    if (jobName !== exclude.name) {
+    if (
+        jobName !== exclude.name
+        && exclude.name !== job.name
+    ) {
         return false;
     }
 
