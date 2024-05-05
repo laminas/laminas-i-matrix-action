@@ -25,6 +25,11 @@
             "exclude": [
                 {
                     "name": "Codeception [8.2, latest]"
+                },
+                {
+                    "name": "Codeception",
+                    "php": "8.2",
+                    "dependencies": "latest"
                 }
             ],
             "ignore_php_platform_requirements": {
@@ -243,6 +248,33 @@
         }
     ],
     "definitions": {
+        "installablePhpVersion": {
+            "type": "string",
+            "title": "Installable PHP versions from available from within the container.",
+            "enum": [
+                "8.0",
+                "8.1",
+                "8.2",
+                "8.3",
+                "@default"
+            ]
+        },
+        "php": {
+            "title": "The PHP version",
+            "type": "string",
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/installablePhpVersion"
+                },
+                {
+                    "enum": [
+                        "*",
+                        "@latest",
+                        "@lowest"
+                    ]
+                }
+            ]
+        },
         "extensions": {
             "type": "array",
             "title": "A list of PHP extensions",
@@ -285,6 +317,11 @@
                 [
                     {
                         "name": "Codeception [8.2, latest]"
+                    },
+                    {
+                        "name": "Codeception",
+                        "php": "8.2",
+                        "dependencies": "latest"
                     }
                 ]
             ],
@@ -294,6 +331,11 @@
                 "examples": [
                     {
                         "name": "Codeception [8.2, latest]"
+                    },
+                    {
+                        "name": "Codeception",
+                        "php": "8.2",
+                        "dependencies": "latest"
                     }
                 ],
                 "required": [
@@ -306,8 +348,21 @@
                         "description": "The name of the job to be excluded. Must be an exact match.",
                         "minLength": 1,
                         "examples": [
-                            "Codeception [8.2, latest]"
+                            "Codeception [8.2, latest]",
+                            "Codeception"
                         ]
+                    },
+                    "php": {
+                        "ref": "#/definitions/php",
+                        "description": "The PHP version to to be excluded.",
+                        "default": "*"
+                    },
+                    "dependencies": {
+                        "type": "string",
+                        "enum": ["latest", "lowest", "locked", "*"],
+                        "title": "The composer dependencies to be excluded",
+                        "description": "The composer dependencies to be excluded. If the wildcard `*` is passed, all dependencies are being excluded",
+                        "default": "*"
                     }
                 },
                 "additionalProperties": false
@@ -331,13 +386,10 @@
             }
         },
         "stablePHP": {
-            "type": "string",
-            "minLength": 1,
+            "$ref": "#/definitions/installablePhpVersion",
             "title": "The PHP version to be used for stable checks",
             "description": "This PHP version is used for all QA check jobs. The default depends on the `composer.json` of the project and usually reflects the minimum supported PHP version of that project.",
-            "examples": [
-                "8.0"
-            ]
+            "default": "8.0"
         },
         "backwardCompatibilityCheck": {
             "type": "boolean",
@@ -361,18 +413,9 @@
             ],
             "properties": {
                 "php": {
-                    "type": "string",
-                    "title": "The php version",
+                    "$ref": "#/definitions/php",
                     "description": "The PHP version to be used. If the wildcard `*` is passed, a list of checks is created containing *every* supported PHP version by the project and the matrix action.",
-                    "enum": [
-                        "8.0",
-                        "8.1",
-                        "8.2",
-                        "8.3",
-                        "*",
-                        "@latest",
-                        "@lowest"
-                    ]
+                    "default": "*"
                 },
                 "dependencies": {
                     "type": "string",
