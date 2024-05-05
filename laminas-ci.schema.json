@@ -266,11 +266,12 @@
             ]
         },
         "php": {
-            "$ref": "#/definitions/installablePhpVersion",
             "title": "The PHP version",
             "type": "string",
             "anyOf": [
-                { "$ref": "#/definitions/installablePhpVersion" },
+                {
+                    "$ref": "#/definitions/installablePhpVersion"
+                },
                 {
                     "enum": [
                         "*",
