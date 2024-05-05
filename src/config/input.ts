@@ -3,13 +3,15 @@ import {ComposerDependencySet, IgnorePhpPlatformRequirements} from './app';
 
 export interface JobToExcludeFromFile {
     name: string;
+    php?: InstallablePhpVersionType,
+    dependencies?: ComposerDependencySet,
 }
 
 export interface ConfigurationFromFile {
     extensions?: string[];
     ini?: string[];
     ignore_php_platform_requirements?: IgnorePhpPlatformRequirements;
-    stablePHP?: string;
+    stablePHP?: InstallablePhpVersionType;
     additional_composer_arguments?: string[];
     backwardCompatibilityCheck?: boolean;
 }
