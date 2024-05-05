@@ -248,9 +248,9 @@
         }
     ],
     "definitions": {
-        "php": {
+        "installablePhpVersion": {
             "type": "string",
-            "title": "The php version",
+            "title": "Installable PHP versions from available from within the container.",
             "enum": [
                 "5.6",
                 "7.0",
@@ -262,8 +262,14 @@
                 "8.1",
                 "8.2",
                 "8.3",
+                "@default"
+            ]
+        },
+        "php": {
+            "$ref": "#/definitions/installablePhpVersion",
+            "title": "The PHP version",
+            "enum": [
                 "*",
-                "@default",
                 "@latest",
                 "@lowest"
             ]

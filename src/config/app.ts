@@ -3,9 +3,28 @@ import semver from 'semver';
 import parseJsonFile from '../json';
 import {isToolRunningContainerDefaultPhpVersion, Tool, ToolExecutionType} from '../tools';
 import {Logger} from '../logging';
-import {CURRENT_STABLE, INSTALLABLE_VERSIONS, InstallablePhpVersionType, isInstallableVersion} from './php';
+import {
+    CONTAINER_DEFAULT_PHP_VERSION,
+    CURRENT_STABLE,
+    INSTALLABLE_VERSIONS,
+    InstallablePhpVersionType,
+    isInstallableVersion
+} from './php';
 import {ComposerJson} from './composer';
-import {ConfigurationFromFile, isAdditionalChecksConfiguration, isAnyComposerDependencySet, isAnyPhpVersionType, isConfigurationContainingJobExclusions, isExplicitChecksConfiguration, isLatestPhpVersionType, isLowestPhpVersionType, JobDefinitionFromFile, JobFromFile, JobToExcludeFromFile, WILDCARD_ALIAS} from './input';
+import {
+    ConfigurationFromFile,
+    isAdditionalChecksConfiguration,
+    isAnyComposerDependencySet,
+    isAnyPhpVersionType,
+    isConfigurationContainingJobExclusions,
+    isExplicitChecksConfiguration,
+    isLatestPhpVersionType,
+    isLowestPhpVersionType,
+    JobDefinitionFromFile,
+    JobFromFile,
+    JobToExcludeFromFile,
+    WILDCARD_ALIAS
+} from './input';
 
 export const OPERATING_SYSTEM = 'ubuntu-latest';
 export const ACTION = 'laminas/laminas-continuous-integration-action@v1';
@@ -447,7 +466,7 @@ function createNoOpCheck(config: Config): Job {
         operatingSystem : OPERATING_SYSTEM,
         action          : ACTION,
         job             : {
-            php                          : config.stablePhpVersion,
+            php                          : CONTAINER_DEFAULT_PHP_VERSION,
             phpExtensions                : [],
             command                      : '',
             composerDependencySet        : ComposerDependencySet.LOCKED,
