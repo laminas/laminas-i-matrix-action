@@ -268,10 +268,16 @@
         "php": {
             "$ref": "#/definitions/installablePhpVersion",
             "title": "The PHP version",
-            "enum": [
-                "*",
-                "@latest",
-                "@lowest"
+            "type": "string",
+            "allOf": [
+                { "$ref": "#/definitions/installablePhpVersion" },
+                {
+                    "enum": [
+                        "*",
+                        "@latest",
+                        "@lowest"
+                    ]
+                }
             ]
         },
         "extensions": {
