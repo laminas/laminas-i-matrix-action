@@ -269,7 +269,7 @@
             "$ref": "#/definitions/installablePhpVersion",
             "title": "The PHP version",
             "type": "string",
-            "allOf": [
+            "anyOf": [
                 { "$ref": "#/definitions/installablePhpVersion" },
                 {
                     "enum": [
