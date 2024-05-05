@@ -242,20 +242,29 @@ function isJobExcludedByDeprecatedCommandName(job: Job, exclusions: JobToExclude
     );
 }
 
+function isJobExcludedByName(job: Job, exclude: JobToExcludeFromFile): boolean {
+    if (job.name === exclude.name) {
+        return true;
+    }
+
+    if (isJobFromTool(job)) {
+        return job.tool.name === exclude.name;
+    }
+
+    return false;
+}
+
 function isJobExcludedByConfiguration(
     job: Job,
     exclude: JobToExcludeFromFile,
     config: Config,
     logger: Logger
 ): boolean {
-    const jobName = isJobFromTool(job) ? job.tool.name : job.name;
-
-    if (
-        jobName !== exclude.name
-        && exclude.name !== job.name
-    ) {
+    if (!isJobExcludedByName(job, exclude)) {
         return false;
     }
+
+    const jobName = isJobFromTool(job) ? job.tool.name : job.name;
 
     const phpVersionToExclude = exclude.php ?? WILDCARD_ALIAS;
     const dependenciesToExclude = exclude.dependencies ?? WILDCARD_ALIAS;
