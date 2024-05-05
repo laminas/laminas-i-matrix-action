@@ -385,7 +385,7 @@
             }
         },
         "stablePHP": {
-            "$ref": "#/definitions/php",
+            "$ref": "#/definitions/installablePhpVersion",
             "title": "The PHP version to be used for stable checks",
             "description": "This PHP version is used for all QA check jobs. The default depends on the `composer.json` of the project and usually reflects the minimum supported PHP version of that project.",
             "default": "8.0"
