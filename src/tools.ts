@@ -154,6 +154,13 @@ export default function createTools(config: Config): Array<Tool> {
             filesToCheck  : [ '.php-cs-fixer.php', '.php-cs-fixer.dist.php' ],
             toolType      : ToolType.CODE_CHECK,
         },
+        {
+            executionType : ToolExecutionType.STATIC,
+            name          : 'PHPStan',
+            command       : './vendor/bin/phpstan analyse --error-format=github --ansi --no-progress',
+            filesToCheck  : [ 'phpstan.neon', 'phpstan.neon.dist', 'phpstan.dist.neon' ],
+            toolType      : ToolType.CODE_CHECK,
+        },
         backwardCompatibilityCheckTool(config),
     ].filter((tool) => tool !== null) as Tool[];
 
