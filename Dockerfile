@@ -1,4 +1,4 @@
-FROM node:21.7.3-alpine as compiler
+FROM node:21.7.3-alpine AS compiler
 
 RUN mkdir -p /usr/local/source
 WORKDIR /usr/local/source
