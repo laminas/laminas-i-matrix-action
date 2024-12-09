@@ -1,8 +1,9 @@
 import fs, {PathLike} from 'fs';
 import semver from 'semver';
 import parseJsonFile from '../json';
-import {isToolRunningContainerDefaultPhpVersion, Tool, ToolExecutionType} from '../tools';
+import {isToolRunningContainerDefaultPhpVersion, Tool} from '../tools';
 import {Logger} from '../logging';
+import {ToolExecutionType} from '../enum/toolExecutionType';
 import {
     CONTAINER_DEFAULT_PHP_VERSION,
     CURRENT_STABLE,
