@@ -1,27 +1,17 @@
 import fs, {PathLike} from 'fs';
 import {Config} from './config/app';
-import {ComposerJson} from './config/composer';
-import parseJsonFile from './json';
 import {CONTAINER_DEFAULT_PHP_VERSION} from './config/php';
-
-export enum ToolExecutionType {
-    /**
-     * @description Executed on every supported PHP version with lowest & latest dependencies.
-     *              In case, a lock-file is present, the minimum supported PHP version will also run with LOCKED
-     *              dependencies.
-     */
-    MATRIX = 'matrix',
-
-    /**
-     * @description Executed on the minimum PHP version with either LOCKED or LATEST dependencies.
-     */
-    STATIC = 'static',
-}
-
-enum ToolType {
-    LINTER = 'linter',
-    CODE_CHECK = 'code_check',
-}
+import {PHPUnitTool} from './tools/phpunit';
+import {InfectionTool} from './tools/infection';
+import {PhpCodeSnifferTool} from './tools/codesniffer';
+import {PsalmTool} from './tools/psalm';
+import {ComposerRequireCheckerTool} from './tools/composerRequireChecker';
+import {PhpBenchTool} from './tools/phpbench';
+import {CodeceptionTool} from './tools/codeception';
+import {PhpCsFixerTool} from './tools/phpCsFixer';
+import {PHPStanTool} from './tools/phpstan';
+import {ToolExecutionType} from './enum/toolExecutionType';
+import {ToolType} from './enum/toolType';
 
 export type Tool = {
     executionType: ToolExecutionType,
@@ -34,16 +24,6 @@ export type Tool = {
 
 export type ToolRunningContainerDefaultPhpVersion = Tool & {
     php: typeof CONTAINER_DEFAULT_PHP_VERSION,
-}
-
-function detectInfectionCommand(): string {
-    const composerJson: ComposerJson = parseJsonFile('composer.json', true) as ComposerJson;
-
-    if (composerJson['require-dev']?.['roave/infection-static-analysis-plugin'] !== undefined) {
-        return './vendor/bin/roave-infection-static-analysis-plugin';
-    }
-
-    return './vendor/bin/infection';
 }
 
 function backwardCompatibilityCheckTool(config: Config): ToolRunningContainerDefaultPhpVersion | null {
@@ -70,14 +50,14 @@ export default function createTools(config: Config): Array<Tool> {
         {
             executionType : ToolExecutionType.STATIC,
             name          : 'Documentation Linting',
-            command       : 'markdownlint doc/book/**/*.md',
+            command       : "markdownlint 'doc/book/**/*.md'",
             filesToCheck  : [ 'doc/book/' ],
             toolType      : ToolType.LINTER,
         },
         {
             executionType : ToolExecutionType.STATIC,
             name          : 'Documentation Linting',
-            command       : 'markdownlint docs/book/**/*.md',
+            command       : "markdownlint 'docs/book/**/*.md'",
             filesToCheck  : [ 'docs/book/' ],
             toolType      : ToolType.LINTER,
         },
@@ -95,65 +75,15 @@ export default function createTools(config: Config): Array<Tool> {
             filesToCheck  : [ 'README.md' ],
             toolType      : ToolType.LINTER,
         },
-        {
-            executionType     : ToolExecutionType.MATRIX,
-            name              : 'PHPUnit',
-            command           : './vendor/bin/phpunit',
-            filesToCheck      : [ 'phpunit.xml.dist', 'phpunit.xml' ],
-            toolType          : ToolType.CODE_CHECK,
-            lintConfigCommand : 'xmllint --schema vendor/phpunit/phpunit/phpunit.xsd',
-        },
-        {
-            executionType : ToolExecutionType.STATIC,
-            name          : 'Infection',
-            command       : detectInfectionCommand(),
-            filesToCheck  : [ 'infection.json', 'infection.json.dist' ],
-            toolType      : ToolType.CODE_CHECK,
-        },
-        {
-            executionType     : ToolExecutionType.STATIC,
-            name              : 'PHPCodeSniffer',
-            command           : './vendor/bin/phpcs -q --report=checkstyle | cs2pr',
-            filesToCheck      : [ 'phpcs.xml', 'phpcs.xml.dist' ],
-            toolType          : ToolType.CODE_CHECK,
-            lintConfigCommand : 'xmllint --schema vendor/squizlabs/php_codesniffer/phpcs.xsd',
-        },
-        {
-            executionType     : ToolExecutionType.STATIC,
-            name              : 'Psalm',
-            command           : './vendor/bin/psalm --shepherd --stats --output-format=github --no-cache',
-            filesToCheck      : [ 'psalm.xml.dist', 'psalm.xml' ],
-            toolType          : ToolType.CODE_CHECK,
-            lintConfigCommand : 'xmllint --schema vendor/vimeo/psalm/config.xsd',
-        },
-        {
-            executionType : ToolExecutionType.STATIC,
-            name          : 'Composer Require Checker',
-            command       : './vendor/bin/composer-require-checker check --config-file=composer-require-checker.json -n -v composer.json',
-            filesToCheck  : [ 'composer-require-checker.json' ],
-            toolType      : ToolType.CODE_CHECK,
-        },
-        {
-            executionType : ToolExecutionType.STATIC,
-            name          : 'PHPBench',
-            command       : './vendor/bin/phpbench run --revs=2 --iterations=2 --report=aggregate',
-            filesToCheck  : [ 'phpbench.json' ],
-            toolType      : ToolType.CODE_CHECK,
-        },
-        {
-            executionType : ToolExecutionType.STATIC,
-            name          : 'Codeception',
-            command       : './vendor/bin/codecept run',
-            filesToCheck  : [ 'codeception.yml.dist', 'codeception.yml' ],
-            toolType      : ToolType.CODE_CHECK,
-        },
-        {
-            executionType : ToolExecutionType.STATIC,
-            name          : 'PHP CS Fixer',
-            command       : './vendor/bin/php-cs-fixer fix -v --diff --dry-run',
-            filesToCheck  : [ '.php-cs-fixer.php', '.php-cs-fixer.dist.php' ],
-            toolType      : ToolType.CODE_CHECK,
-        },
+        PHPUnitTool,
+        InfectionTool,
+        PhpCodeSnifferTool,
+        PsalmTool,
+        ComposerRequireCheckerTool,
+        PhpBenchTool,
+        CodeceptionTool,
+        PhpCsFixerTool,
+        PHPStanTool,
         backwardCompatibilityCheckTool(config),
     ].filter((tool) => tool !== null) as Tool[];
 
